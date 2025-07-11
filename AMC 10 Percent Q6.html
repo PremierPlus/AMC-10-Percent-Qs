@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMC 10 Percent Question 6</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        .question-text {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            text-align: left; /* Align question text to left for better readability */
+        }
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            text-align: left; /* Align options to left */
+        }
+        .option-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        .option-item:hover {
+            background-color: #f7fafc;
+        }
+        .option-item input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+            accent-color: #6366f1; /* Custom color for radio button */
+        }
+        .option-item label {
+            font-size: 1rem;
+            color: #2d3748;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+        }
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        .btn-primary {
+            background-color: #6366f1;
+            color: #ffffff;
+            background-image: linear-gradient(to right, #6366f1, #8b5cf6);
+        }
+        .btn-primary:hover {
+            background-color: #5a5ceb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .result-box {
+            background-color: #edf2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-size: 1.1rem;
+            color: #2d3748;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+        }
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AMC 10 Percent Question 6</h1>
+        <p class="question-text">
+            <span id="percentChangeVal"></span> percent <span id="lessMoreText"></span> than <span id="baseNumberVal"></span> is <span id="fractionVal"></span> more than what number?
+        </p>
+
+        <div class="options-group" id="optionsGroup">
+            <!-- Options will be dynamically generated here -->
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="checkAnswer()">Check Answer</button>
+            <button class="btn btn-primary" onclick="generateNewQuestion()">Generate New Question</button>
+        </div>
+
+        <div id="result" class="result-box">
+            Select an option and click "Check Answer".
+        </div>
+    </div>
+
+    <script>
+        // Global variables to store current question parameters
+        let currentPercentChange, currentLessMoreType, currentBaseNumber, currentFractionDenominator;
+
+        /**
+         * Generates a random integer within a specified range.
+         * @param {number} min - The minimum value (inclusive).
+         * @param {number} max - The maximum value (inclusive).
+         * @returns {number} A random integer.
+         */
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        /**
+         * Converts a number to its fractional string (e.g., 2 -> "1/2", 3 -> "1/3").
+         * @param {number} n - The denominator of the fraction.
+         * @returns {string} The fractional string.
+         */
+        function getFractionString(n) {
+            return `1/${n}`;
+        }
+
+        /**
+         * Calculates the correct answer for the question.
+         * This function is now primarily for internal calculation and verification.
+         * @param {number} percentChange - The percentage change.
+         * @param {string} lessMoreType - 'less' or 'more'.
+         * @param {number} baseNumber - The base number.
+         * @param {number} fractionDenominator - The denominator of the fraction.
+         * @returns {number} The calculated number (guaranteed to be an integer with current generation logic).
+         */
+        function getCorrectAnswer(percentChange, lessMoreType, baseNumber, fractionDenominator) {
+            let leftSideValue;
+            if (lessMoreType === 'less') {
+                leftSideValue = baseNumber * (1 - percentChange / 100);
+            } else { // 'more'
+                leftSideValue = baseNumber * (1 + percentChange / 100);
+            }
+
+            const rightSideFactor = 1 + (1 / fractionDenominator);
+            const result = leftSideValue / rightSideFactor;
+            return Math.round(result); // Round to nearest integer to be safe, though it should be exact
+        }
+
+        /**
+         * Generates a new math question with random integer values for the answer and base number, and updates the UI.
+         */
+        function generateNewQuestion() {
+            let calculatedCorrectAnswer;
+            let attempts = 0;
+            const maxAttempts = 500; // Increased attempts for better chance of finding integer solutions
+
+            do {
+                // 1. Generate an integer answer (X) that is a multiple of currentFractionDenominator (D)
+                currentFractionDenominator = getRandomInt(2, 5); // D: 2, 3, 4, 5
+                // Ensure X is a multiple of D, and X is within a reasonable range (e.g., 10 to 100)
+                calculatedCorrectAnswer = getRandomInt(Math.ceil(10 / currentFractionDenominator), Math.floor(100 / currentFractionDenominator)) * currentFractionDenominator;
+                if (calculatedCorrectAnswer === 0) calculatedCorrectAnswer = currentFractionDenominator; // Avoid 0 if range allows
+
+                // 2. Calculate the value of the left side of the equation (leftSideValue)
+                // leftSideValue = X * (1 + 1/D) = X * (D+1)/D
+                // This will be an integer because X is a multiple of D
+                const leftSideValue = calculatedCorrectAnswer * (currentFractionDenominator + 1) / currentFractionDenominator;
+
+                // 3. Generate percent change (P) and type ('less'/'more')
+                // Use percentages that simplify well with 100 for easier integer results for baseNumber
+                const commonPercentages = [10, 20, 25, 30, 40, 50];
+                currentPercentChange = commonPercentages[getRandomInt(0, commonPercentages.length - 1)];
+                currentLessMoreType = Math.random() < 0.5 ? 'less' : 'more';
+
+                // 4. Calculate potential divisor for base number: (100 - P) or (100 + P)
+                let divisor;
+                if (currentLessMoreType === 'less') {
+                    divisor = 100 - currentPercentChange;
+                } else { // 'more'
+                    divisor = 100 + currentPercentChange;
+                }
+
+                // 5. Check if (leftSideValue * 100) is divisible by 'divisor'
+                // And ensure the resulting base number is an integer and within a reasonable range
+                if (divisor !== 0 && (leftSideValue * 100) % divisor === 0) {
+                    const tempBaseNumber = (leftSideValue * 100) / divisor;
+                    if (Number.isInteger(tempBaseNumber) && tempBaseNumber > 10 && tempBaseNumber < 200) {
+                        currentBaseNumber = tempBaseNumber;
+                        break; // Found a good set of numbers for an integer answer and base number
+                    }
+                }
+                attempts++;
+            } while (attempts < maxAttempts);
+
+            // Fallback if no integer solution found after maxAttempts (should be rare)
+            if (attempts === maxAttempts) {
+                // For simplicity and consistency, let's just use a fixed, known-good set if attempts run out.
+                currentPercentChange = 20;
+                currentLessMoreType = 'less';
+                currentBaseNumber = 60;
+                currentFractionDenominator = 3;
+                calculatedCorrectAnswer = 36; // Hardcoded answer for this specific fallback
+            }
+
+            // Update the question text with new values
+            document.getElementById('percentChangeVal').innerText = currentPercentChange;
+            document.getElementById('lessMoreText').innerText = currentLessMoreType;
+            document.getElementById('baseNumberVal').innerText = currentBaseNumber;
+            document.getElementById('fractionVal').innerText = getFractionString(currentFractionDenominator);
+
+
+            // Generate multiple-choice options (distractors will also be integers)
+            const options = [];
+            options.push(calculatedCorrectAnswer); // Add the correct answer
+
+            while (options.length < 4) {
+                let distractor;
+                const offset = getRandomInt(-10, 10); // Integer offset for distractors
+                distractor = calculatedCorrectAnswer + offset;
+
+                // Ensure distractor is positive, unique, and not the same as the correct answer
+                if (distractor >= 0 && !options.includes(distractor) && distractor !== calculatedCorrectAnswer) {
+                    options.push(distractor);
+                }
+            }
+
+            // Shuffle the options
+            options.sort(() => Math.random() - 0.5);
+
+            // Display options
+            const optionsGroup = document.getElementById('optionsGroup');
+            optionsGroup.innerHTML = ''; // Clear previous options
+
+            const optionLetters = ['A', 'B', 'C', 'D'];
+            options.forEach((option, index) => {
+                const optionItem = document.createElement('div');
+                optionItem.className = 'option-item';
+                optionItem.innerHTML = `
+                    <input type="radio" id="option${optionLetters[index]}" name="answerOption" value="${option}">
+                    <label for="option${optionLetters[index]}">${optionLetters[index]}) ${option}</label>
+                `;
+                optionsGroup.appendChild(optionItem);
+            });
+
+            // Clear the result message
+            document.getElementById('result').innerText = "Select an option and click 'Check Answer'.";
+            document.getElementById('result').style.color = '#2d3748'; // Reset color
+        }
+
+        /**
+         * Checks the user's selected answer against the correct answer for the current question.
+         */
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="answerOption"]:checked');
+            const resultDiv = document.getElementById('result');
+
+            if (!selectedOption) {
+                resultDiv.innerText = "Please select an option.";
+                resultDiv.style.color = '#e53e3e'; // Red for error
+                return;
+            }
+
+            const userAnswer = parseInt(selectedOption.value); // Parse as integer
+            // Recalculate correct answer based on current parameters to ensure consistency
+            const correctAnswer = getCorrectAnswer(
+                currentPercentChange,
+                currentLessMoreType,
+                currentBaseNumber,
+                currentFractionDenominator
+            );
+
+            // Compare the user's integer answer with the correct integer answer
+            if (userAnswer === correctAnswer) {
+                resultDiv.innerText = `Correct! The number is ${correctAnswer}.`;
+                resultDiv.style.color = '#38a169'; // Green for correct
+            } else {
+                resultDiv.innerText = `Incorrect. The correct answer is ${correctAnswer}.`; // Show correct answer on incorrect
+                resultDiv.style.color = '#e53e3e'; // Red for incorrect
+            }
+        }
+
+        // Generate a new question when the page loads
+        window.onload = generateNewQuestion;
+    </script>
+</body>
+</html>

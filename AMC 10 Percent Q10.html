@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Math Question</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #e2e8f0; /* Light border */
+        }
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #2d3748; /* Darker text */
+            line-height: 1.6;
+        }
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns for options */
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-items: center;
+        }
+        .option-button {
+            padding: 12px 18px;
+            border: 2px solid #cbd5e0; /* Light gray border */
+            border-radius: 10px;
+            font-size: 1.1rem;
+            width: 100%; /* Make buttons fill their grid cell */
+            max-width: 200px; /* Max width for options */
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            background-color: #f7fafc; /* Lighter background for options */
+            color: #2d3748;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            display: flex; /* Use flexbox for alignment of label and value */
+            align-items: center;
+            justify-content: center;
+            gap: 8px; /* Space between label and value */
+        }
+        .option-label {
+            font-weight: bold;
+            color: #4a5568; /* Slightly darker for emphasis */
+        }
+        .option-button:hover {
+            background-color: #ebf4ff; /* Light blue on hover */
+            border-color: #4299e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .option-button.selected {
+            background-color: #bee3f8; /* Light blue when selected */
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.3);
+        }
+        .button {
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin: 0 8px;
+        }
+        .button-primary {
+            background-color: #4299e1; /* Blue */
+            color: white;
+        }
+        .button-primary:hover {
+            background-color: #3182ce; /* Darker blue */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .message {
+            margin-top: 25px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            min-height: 30px; /* Ensure space for message */
+        }
+        .message.correct {
+            color: #38a169; /* Green */
+        }
+        .message.incorrect {
+            color: #e53e3e; /* Red */
+        }
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px;
+            }
+            .question-text {
+                font-size: 1.2rem;
+            }
+            .options-container {
+                grid-template-columns: 1fr; /* Single column on small screens */
+            }
+            .option-button {
+                max-width: 100%;
+            }
+            .button {
+                width: 100%;
+                margin: 8px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="question" class="question-text"></div>
+
+        <div id="optionsContainer" class="options-container">
+            <!-- Multiple choice options will be inserted here -->
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <button id="newQuestionBtn" class="button button-primary">Generate New Question</button>
+    </div>
+
+    <script>
+        // DOM elements
+        const questionElement = document.getElementById('question');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const newQuestionBtn = document.getElementById('newQuestionBtn');
+        const messageElement = document.getElementById('message');
+
+        // Global variable to store the correct answer (rounded to nearest integer percentage)
+        let correctAnswer = 0;
+
+        // Question templates with pre-calculated values for solvable scenarios
+        const questionTemplates = [
+            {
+                year1: 2000,
+                year2: 2010,
+                year3: 2020,
+                increase1: 100,
+                increase2: 100,
+                diffFromSquare: 4, // N2 = b^2 + 4
+                N1: 529, // 23^2
+                N3: 729, // 27^2
+                growth: 37.807 // (729-529)/529 * 100
+            },
+            {
+                year1: 1995,
+                year2: 2005,
+                year3: 2015,
+                increase1: 140,
+                increase2: 140,
+                diffFromSquare: 4, // N2 = b^2 + 4
+                N1: 1089, // 33^2
+                N3: 1369, // 37^2
+                growth: 25.711 // (1369-1089)/1089 * 100
+            },
+            {
+                year1: 1980,
+                year2: 1990,
+                year3: 2000,
+                increase1: 150,
+                increase2: 150,
+                diffFromSquare: 9, // N2 = b^2 + 9 (Original AMC structure)
+                N1: 484, // 22^2
+                N3: 784, // 28^2
+                growth: 61.983 // (784-484)/484 * 100
+            }
+        ];
+
+        const optionLabels = ['A', 'B', 'C', 'D', 'E']; // Labels for multiple choice options
+
+        /**
+         * Generates a random integer within a specified range (inclusive).
+         * @param {number} min - The minimum value.
+         * @param {number} max - The maximum value.
+         * @returns {number} A random integer.
+         */
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        /**
+         * Shuffles an array in place (Fisher-Yates algorithm).
+         * @param {Array} array - The array to shuffle.
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        /**
+         * Generates a new math question and updates the UI with multiple-choice options.
+         */
+        function generateNewQuestion() {
+            // Clear previous message and options
+            messageElement.textContent = '';
+            messageElement.className = 'message';
+            optionsContainer.innerHTML = ''; // Clear old buttons
+
+            // Select a random question template
+            const template = questionTemplates[getRandomInt(0, questionTemplates.length - 1)];
+
+            // Construct the question string using template values
+            const questionText = `In ${template.year1}, the population of a town was a perfect square. Ten years later, after an increase of ${template.increase1} people, the population was ${template.diffFromSquare} more than a perfect square. Now, in ${template.year3}, with an increase of another ${template.increase2} people, the population is once again a perfect square. Which of the following is closest to the percent growth of the town's population during this twenty-year period?`;
+            questionElement.textContent = questionText;
+
+            // Set the correct answer (rounded to nearest integer)
+            correctAnswer = Math.round(template.growth);
+
+            // Generate multiple-choice options
+            const options = new Set();
+            options.add(correctAnswer); // Add the correct answer first
+
+            // Generate 4 incorrect answers
+            while (options.size < 5) {
+                let incorrectOption;
+                // Generate offsets that are typically 5 or 10 percentage points away
+                let offset = (Math.random() < 0.5 ? 5 : 10);
+                if (Math.random() < 0.5) { // Randomly make it less or more than correct answer
+                    incorrectOption = correctAnswer - offset;
+                } else {
+                    incorrectOption = correctAnswer + offset;
+                }
+
+                // Ensure options are distinct, positive, and within a reasonable percentage range (0-100)
+                if (!options.has(incorrectOption) && incorrectOption >= 0 && incorrectOption <= 100) {
+                    options.add(incorrectOption);
+                }
+            }
+
+            const shuffledOptions = Array.from(options);
+            shuffleArray(shuffledOptions);
+
+            // Create and append option buttons with A, B, C, D, E labels
+            shuffledOptions.forEach((optionValue, index) => {
+                const button = document.createElement('button');
+                button.classList.add('option-button');
+                button.innerHTML = `<span class="option-label">(${optionLabels[index]})</span> ${optionValue}%`; // Add % sign
+                button.dataset.value = optionValue; // Store the value in a data attribute
+
+                button.addEventListener('click', () => checkAnswer(parseFloat(button.dataset.value)));
+                optionsContainer.appendChild(button);
+            });
+
+            // Re-enable all option buttons for the new question
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.disabled = false;
+            });
+        }
+
+        /**
+         * Checks the user's selected answer against the correct answer.
+         * @param {number} userAnswer - The value of the option selected by the user.
+         */
+        function checkAnswer(userAnswer) {
+            // Remove 'selected' class from all buttons
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            // Add 'selected' class to the clicked button
+            const clickedButton = optionsContainer.querySelector(`[data-value="${userAnswer}"]`);
+            if (clickedButton) {
+                clickedButton.classList.add('selected');
+            }
+
+            // Compare the rounded user answer with the rounded correct answer
+            if (userAnswer === correctAnswer) {
+                messageElement.textContent = "Correct! Well done!";
+                messageElement.className = 'message correct';
+            } else {
+                messageElement.textContent = `Incorrect. The correct answer was ${correctAnswer}%.`;
+                messageElement.className = 'message incorrect';
+            }
+
+            // Disable all option buttons after an answer is selected
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+
+        // Event Listener
+        newQuestionBtn.addEventListener('click', generateNewQuestion);
+
+        // Generate the first question when the page loads
+        window.onload = generateNewQuestion;
+    </script>
+</body>
+</html>

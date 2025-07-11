@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMC 10 Percent Question 5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        .question-text {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            text-align: left; /* Align question text to left for better readability */
+        }
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            text-align: left; /* Align options to left */
+        }
+        .option-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        .option-item:hover {
+            background-color: #f7fafc;
+        }
+        .option-item input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+            accent-color: #6366f1; /* Custom color for radio button */
+        }
+        .option-item label {
+            font-size: 1rem;
+            color: #2d3748;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+        }
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        .btn-primary {
+            background-color: #6366f1;
+            color: #ffffff;
+            background-image: linear-gradient(to right, #6366f1, #8b5cf6);
+        }
+        .btn-primary:hover {
+            background-color: #5a5ceb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .result-box {
+            background-color: #edf2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-size: 1.1rem;
+            color: #2d3748;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+        }
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AMC 10 Percent Question 5</h1>
+        <p class="question-text">
+            At <span id="location"></span>, <span id="activity1Pct"></span>% of the members <span id="activity1Name"></span>, <span id="activity2Pct"></span>% of the members <span id="activity2Name"></span>, and <span id="overlapPct"></span>% of those who <span id="activity1NameAgain"></span> also <span id="activity2NameAgain"></span>. To the nearest whole percent, what percent of the members who do *not* <span id="activity2NameNegative"></span> <span id="activity1NameQuestion"></span>?
+        </p>
+
+        <div class="options-group" id="optionsGroup">
+            <!-- Options will be dynamically generated here -->
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="checkAnswer()">Check Answer</button>
+            <button class="btn btn-primary" onclick="generateNewQuestion()">Generate New Question</button>
+        </div>
+
+        <div id="result" class="result-box">
+            Select an option and click "Check Answer".
+        </div>
+    </div>
+
+    <script>
+        // Global variables to store current question parameters
+        let currentActivity1Pct, currentActivity2Pct, currentOverlapPct;
+
+        /**
+         * Generates a random integer within a specified range.
+         * @param {number} min - The minimum value (inclusive).
+         * @param {number} max - The maximum value (inclusive).
+         * @returns {number} A random integer.
+         */
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        /**
+         * Calculates the correct percentage for the conditional probability question.
+         * @param {number} activity1Pct - Percentage of members for activity 1.
+         * @param {number} activity2Pct - Percentage of members for activity 2.
+         * @param {number} overlapPct - Percentage of activity 1 participants who also do activity 2.
+         * @returns {number} The calculated percentage, rounded to the nearest whole number.
+         */
+        function getCorrectPercentage(activity1Pct, activity2Pct, overlapPct) {
+            // Convert percentages to decimals
+            const pA1 = activity1Pct / 100;
+            const pA2 = activity2Pct / 100;
+            const pA2_given_A1 = overlapPct / 100;
+
+            // P(A1 and A2) = P(A2|A1) * P(A1)
+            const pA1_and_A2 = pA2_given_A1 * pA1;
+
+            // P(not A2) = 1 - P(A2)
+            const pNotA2 = 1 - pA2;
+
+            // P(A1 and not A2) = P(A1) - P(A1 and A2)
+            const pA1_and_NotA2 = pA1 - pA1_and_A2;
+
+            // We want P(A1 | not A2) = P(A1 and not A2) / P(not A2)
+            if (pNotA2 === 0) {
+                return 0; // Avoid division by zero
+            }
+            const result = (pA1_and_NotA2 / pNotA2) * 100;
+            return Math.round(result); // Round to the nearest whole percent
+        }
+
+        /**
+         * Generates a new math question with random values and updates the UI.
+         */
+        function generateNewQuestion() {
+            const locations = ['Greenwood Community Center', 'Oakwood Sports Club', 'Maplewood Academy'];
+            const activities = [
+                { name1: 'play soccer', name2: 'swim' },
+                { name1: 'participate in fitness classes', name2: 'use the swimming pool' },
+                { name1: 'attend art workshops', name2: 'join the book club' }
+            ];
+
+            const selectedLocation = locations[getRandomInt(0, locations.length - 1)];
+            const selectedActivities = activities[getRandomInt(0, activities.length - 1)];
+
+            currentActivity1Pct = getRandomInt(60, 80); // e.g., 60%, 70%, 80%
+            currentActivity2Pct = getRandomInt(30, 50); // e.g., 30%, 40%, 50%
+            currentOverlapPct = getRandomInt(40, 60); // e.g., 40%, 50%, 60%
+
+            // Ensure overlap percentage is not too high relative to activity1Pct
+            // (e.g., 60% of 70% is 42%, which must be less than 40% (activity2Pct))
+            // This adjustment ensures valid probabilities and prevents negative results in intermediate steps
+            let calculatedCorrectAnswer;
+            let attempts = 0;
+            do {
+                currentActivity1Pct = getRandomInt(60, 80);
+                currentActivity2Pct = getRandomInt(30, 50);
+                currentOverlapPct = getRandomInt(40, 60);
+
+                const pA1 = currentActivity1Pct / 100;
+                const pA2 = currentActivity2Pct / 100;
+                const pA2_given_A1 = currentOverlapPct / 100;
+
+                const pA1_and_A2 = pA2_given_A1 * pA1;
+
+                // Ensure P(A1 and A2) <= P(A2) to be logically consistent
+                // Also ensure P(A1 and not A2) is positive
+                if (pA1_and_A2 <= pA2 && (pA1 - pA1_and_A2) >= 0) {
+                    calculatedCorrectAnswer = getCorrectPercentage(currentActivity1Pct, currentActivity2Pct, currentOverlapPct);
+                    // Ensure the answer is within a reasonable range (e.g., not 0 or 100 unless intended)
+                    if (calculatedCorrectAnswer > 5 && calculatedCorrectAnswer < 95) {
+                        break; // Found a good set of numbers
+                    }
+                }
+                attempts++;
+            } while (attempts < 100); // Prevent infinite loops if parameters are too restrictive
+
+
+            // Update the question text with new values
+            document.getElementById('location').innerText = selectedLocation;
+            document.getElementById('activity1Pct').innerText = currentActivity1Pct;
+            document.getElementById('activity1Name').innerText = selectedActivities.name1;
+            document.getElementById('activity2Pct').innerText = currentActivity2Pct;
+            document.getElementById('activity2Name').innerText = selectedActivities.name2;
+            document.getElementById('overlapPct').innerText = currentOverlapPct;
+            document.getElementById('activity1NameAgain').innerText = selectedActivities.name1;
+            document.getElementById('activity2NameAgain').innerText = selectedActivities.name2;
+            document.getElementById('activity2NameNegative').innerText = selectedActivities.name2;
+            document.getElementById('activity1NameQuestion').innerText = selectedActivities.name1;
+
+
+            // Generate multiple-choice options
+            const options = [];
+            options.push(calculatedCorrectAnswer); // Add the correct answer
+
+            // Generate three distractors
+            while (options.length < 4) {
+                let distractor;
+                // Generate distractors that are close but not equal to the correct answer
+                const offset = getRandomInt(-10, 10); // Offset by -10 to +10 percentage points
+                distractor = Math.round(calculatedCorrectAnswer + offset);
+
+                // Ensure distractor is within 0-100 range and is unique
+                if (distractor >= 0 && distractor <= 100 && !options.includes(distractor)) {
+                    options.push(distractor);
+                }
+            }
+
+            // Shuffle the options
+            options.sort(() => Math.random() - 0.5);
+
+            // Display options
+            const optionsGroup = document.getElementById('optionsGroup');
+            optionsGroup.innerHTML = ''; // Clear previous options
+
+            const optionLetters = ['A', 'B', 'C', 'D'];
+            options.forEach((option, index) => {
+                const optionItem = document.createElement('div');
+                optionItem.className = 'option-item';
+                optionItem.innerHTML = `
+                    <input type="radio" id="option${optionLetters[index]}" name="answerOption" value="${option}">
+                    <label for="option${optionLetters[index]}">${optionLetters[index]}) ${option}%</label>
+                `;
+                optionsGroup.appendChild(optionItem);
+            });
+
+            // Clear the result message
+            document.getElementById('result').innerText = "Select an option and click 'Check Answer'.";
+            document.getElementById('result').style.color = '#2d3748'; // Reset color
+        }
+
+        /**
+         * Checks the user's selected answer against the correct answer for the current question.
+         */
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="answerOption"]:checked');
+            const resultDiv = document.getElementById('result');
+
+            if (!selectedOption) {
+                resultDiv.innerText = "Please select an option.";
+                resultDiv.style.color = '#e53e3e'; // Red for error
+                return;
+            }
+
+            const userAnswer = parseFloat(selectedOption.value);
+            const correctAnswer = getCorrectPercentage(currentActivity1Pct, currentActivity2Pct, currentOverlapPct);
+
+            // Compare the user's answer with the correct answer
+            if (userAnswer === correctAnswer) {
+                resultDiv.innerText = `Correct! The percentage is ${correctAnswer}%.`;
+                resultDiv.style.color = '#38a169'; // Green for correct
+            } else {
+                resultDiv.innerText = `Incorrect. The correct answer is ${correctAnswer}%.`; // Show correct answer on incorrect
+                resultDiv.style.color = '#e53e3e'; // Red for incorrect
+            }
+        }
+
+        // Generate a new question when the page loads
+        window.onload = generateNewQuestion;
+    </script>
+</body>
+</html>

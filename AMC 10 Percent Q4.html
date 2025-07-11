@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMC 10 Percent Question 4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        .question-text {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            text-align: left; /* Align question text to left for better readability */
+        }
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            text-align: left; /* Align options to left */
+        }
+        .option-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        .option-item:hover {
+            background-color: #f7fafc;
+        }
+        .option-item input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+            accent-color: #6366f1; /* Custom color for radio button */
+        }
+        .option-item label {
+            font-size: 1rem;
+            color: #2d3748;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+        }
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        .btn-primary {
+            background-color: #6366f1;
+            color: #ffffff;
+            background-image: linear-gradient(to right, #6366f1, #8b5cf6);
+        }
+        .btn-primary:hover {
+            background-color: #5a5ceb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .result-box {
+            background-color: #edf2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-size: 1.1rem;
+            color: #2d3748;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+        }
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AMC 10 Percent Question 4</h1>
+        <p class="question-text">
+            A carton of skim milk contains <span id="currentPercentage"></span>% fat, an amount that is <span id="lessMorePercentage"></span>% <span id="lessMoreText"></span> than the amount contained in a carton of whole milk. What is the percentage of fat in whole milk?
+        </p>
+
+        <div class="options-group" id="optionsGroup">
+            <!-- Options will be dynamically generated here -->
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="checkAnswer()">Check Answer</button>
+            <button class="btn btn-primary" onclick="generateNewQuestion()">Generate New Question</button>
+        </div>
+
+        <div id="result" class="result-box">
+            Select an option and click "Check Answer".
+        </div>
+    </div>
+
+    <script>
+        // Global variables to store current question parameters
+        let currentPercentage, lessMorePercentage, lessMoreType;
+
+        /**
+         * Generates a random integer within a specified range.
+         * @param {number} min - The minimum value (inclusive).
+         * @param {number} max - The maximum value (inclusive).
+         * @returns {number} A random integer.
+         */
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        /**
+         * Calculates the correct percentage for the "regular" item.
+         * @param {number} currentPct - The current percentage of the substance.
+         * @param {number} lessMorePct - The percentage less/more.
+         * @param {string} lessMoreType - 'less' or 'more'.
+         * @returns {number} The calculated percentage, rounded to two decimal places.
+         */
+        function getCorrectPercentage(currentPct, lessMorePct, lessMoreType) {
+            let factor;
+            if (lessMoreType === 'less') {
+                factor = (100 - lessMorePct) / 100;
+            } else { // 'more'
+                factor = (100 + lessMorePct) / 100;
+            }
+            const regularPercentage = currentPct / factor;
+            return parseFloat(regularPercentage.toFixed(2));
+        }
+
+        /**
+         * Generates a new math question with random values and updates the UI.
+         */
+        function generateNewQuestion() {
+            // Specific wording for this question
+            const itemType = "carton";
+            const substance = "fat";
+            const comparisonItemName = "milk"; // Used for "whole milk"
+
+            currentPercentage = getRandomInt(1, 4); // e.g., 1%, 2%, 3%, 4% for skim milk fat
+            lessMorePercentage = getRandomInt(10, 60); // e.g., 20%, 40%, 50%
+            lessMoreType = 'less'; // For skim milk, it's always "less fat"
+
+            // Adjust values to ensure a reasonable and positive result
+            // If 'less' makes the result too large, decrease currentPercentage or lessMorePercentage
+            if (currentPercentage / ((100 - lessMorePercentage) / 100) > 100) {
+                 lessMorePercentage = getRandomInt(10, 90); // Ensure percentage less is not 100% or more
+            }
+            // Ensure the result for whole milk is a reasonable percentage (e.g., typically < 5%)
+            let calculatedWholeMilkFat = getCorrectPercentage(currentPercentage, lessMorePercentage, lessMoreType);
+            while (calculatedWholeMilkFat > 6 || calculatedWholeMilkFat < currentPercentage) {
+                currentPercentage = getRandomInt(1, 4);
+                lessMorePercentage = getRandomInt(10, 60);
+                calculatedWholeMilkFat = getCorrectPercentage(currentPercentage, lessMorePercentage, lessMoreType);
+            }
+
+
+            // Update the question text with new values
+            document.getElementById('currentPercentage').innerText = currentPercentage;
+            document.getElementById('lessMorePercentage').innerText = lessMorePercentage;
+            document.getElementById('lessMoreText').innerText = lessMoreType;
+
+
+            // Calculate the correct answer for the new question
+            const correctAnswer = getCorrectPercentage(currentPercentage, lessMorePercentage, lessMoreType);
+
+            // Generate multiple-choice options
+            const options = [];
+            options.push(correctAnswer); // Add the correct answer
+
+            // Generate three distractors
+            while (options.length < 4) {
+                let distractor;
+                // Generate distractors that are close but not equal to the correct answer
+                const offset = (Math.random() * 1.5 + 0.1) * (Math.random() < 0.5 ? 1 : -1); // Small random offset
+                distractor = parseFloat((correctAnswer + offset).toFixed(2));
+
+                // Ensure distractor is not negative and is unique
+                if (distractor >= 0 && !options.includes(distractor)) {
+                    options.push(distractor);
+                }
+            }
+
+            // Shuffle the options
+            options.sort(() => Math.random() - 0.5);
+
+            // Display options
+            const optionsGroup = document.getElementById('optionsGroup');
+            optionsGroup.innerHTML = ''; // Clear previous options
+
+            const optionLetters = ['A', 'B', 'C', 'D'];
+            options.forEach((option, index) => {
+                const optionItem = document.createElement('div');
+                optionItem.className = 'option-item';
+                optionItem.innerHTML = `
+                    <input type="radio" id="option${optionLetters[index]}" name="answerOption" value="${option}">
+                    <label for="option${optionLetters[index]}">${optionLetters[index]}) ${option}%</label>
+                `;
+                optionsGroup.appendChild(optionItem);
+            });
+
+            // Clear the result message
+            document.getElementById('result').innerText = "Select an option and click 'Check Answer'.";
+            document.getElementById('result').style.color = '#2d3748'; // Reset color
+        }
+
+        /**
+         * Checks the user's selected answer against the correct answer for the current question.
+         */
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="answerOption"]:checked');
+            const resultDiv = document.getElementById('result');
+
+            if (!selectedOption) {
+                resultDiv.innerText = "Please select an option.";
+                resultDiv.style.color = '#e53e3e'; // Red for error
+                return;
+            }
+
+            const userAnswer = parseFloat(selectedOption.value);
+            const correctAnswer = getCorrectPercentage(currentPercentage, lessMorePercentage, lessMoreType);
+
+            // Compare the user's answer with the correct answer, allowing for a small tolerance
+            if (Math.abs(userAnswer - correctAnswer) < 0.01) { // Compare with the calculated correct answer directly
+                resultDiv.innerText = `Correct! The percentage is ${correctAnswer.toFixed(2)}%.`;
+                resultDiv.style.color = '#38a169'; // Green for correct
+            } else {
+                resultDiv.innerText = `Incorrect. The correct answer is ${correctAnswer.toFixed(2)}%.`; // Show correct answer on incorrect
+                resultDiv.style.color = '#e53e3e'; // Red for incorrect
+            }
+        }
+
+        // Generate a new question when the page loads
+        window.onload = generateNewQuestion;
+    </script>
+</body>
+</html>

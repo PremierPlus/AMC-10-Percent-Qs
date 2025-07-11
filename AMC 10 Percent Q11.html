@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Math Question</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #e2e8f0; /* Light border */
+        }
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #2d3748; /* Darker text */
+            line-height: 1.6;
+        }
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns for options */
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-items: center;
+        }
+        .option-button {
+            padding: 12px 18px;
+            border: 2px solid #cbd5e0; /* Light gray border */
+            border-radius: 10px;
+            font-size: 1.1rem;
+            width: 100%; /* Make buttons fill their grid cell */
+            max-width: 200px; /* Max width for options */
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            background-color: #f7fafc; /* Lighter background for options */
+            color: #2d3748;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            display: flex; /* Use flexbox for alignment of label and value */
+            align-items: center;
+            justify-content: center;
+            gap: 8px; /* Space between label and value */
+        }
+        .option-label {
+            font-weight: bold;
+            color: #4a5568; /* Slightly darker for emphasis */
+        }
+        .option-button:hover {
+            background-color: #ebf4ff; /* Light blue on hover */
+            border-color: #4299e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .option-button.selected {
+            background-color: #bee3f8; /* Light blue when selected */
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.3);
+        }
+        .button {
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin: 0 8px;
+        }
+        .button-primary {
+            background-color: #4299e1; /* Blue */
+            color: white;
+        }
+        .button-primary:hover {
+            background-color: #3182ce; /* Darker blue */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .message {
+            margin-top: 25px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            min-height: 30px; /* Ensure space for message */
+        }
+        .message.correct {
+            color: #38a169; /* Green */
+        }
+        .message.incorrect {
+            color: #e53e3e; /* Red */
+        }
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px;
+            }
+            .question-text {
+                font-size: 1.2rem;
+            }
+            .options-container {
+                grid-template-columns: 1fr; /* Single column on small screens */
+            }
+            .option-button {
+                max-width: 100%;
+            }
+            .button {
+                width: 100%;
+                margin: 8px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="question" class="question-text"></div>
+
+        <div id="optionsContainer" class="options-container">
+            <!-- Multiple choice options will be inserted here -->
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <button id="newQuestionBtn" class="button button-primary">Generate New Question</button>
+    </div>
+
+    <script>
+        // DOM elements
+        const questionElement = document.getElementById('question');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const newQuestionBtn = document.getElementById('newQuestionBtn');
+        const messageElement = document.getElementById('message');
+
+        // Global variable to store the correct answer (percentage)
+        let correctAnswer = 0;
+
+        // Helper function to represent fractions as text
+        function fractionToText(numerator, denominator) {
+            if (numerator === 1 && denominator === 2) return "one half";
+            if (numerator === 1 && denominator === 3) return "one third";
+            if (numerator === 2 && denominator === 3) return "two thirds";
+            if (numerator === 1 && denominator === 4) return "one fourth";
+            if (numerator === 3 && denominator === 4) return "three fourths";
+            if (numerator === 1 && denominator === 5) return "one fifth";
+            if (numerator === 2 && denominator === 5) return "two fifths";
+            if (numerator === 3 && denominator === 5) return "three fifths";
+            if (numerator === 4 && denominator === 5) return "four fifths";
+            if (numerator === 1 && denominator === 10) return "one tenth";
+            if (numerator === 3 && denominator === 10) return "three tenths";
+            if (numerator === 4 && denominator === 10) return "four tenths";
+            if (numerator === 6 && denominator === 10) return "six tenths";
+            return `${numerator}/${denominator}`; // Fallback for less common fractions
+        }
+
+        // Question templates with fractions (numerator, denominator)
+        const questionTemplates = [
+            {
+                pinkRosesFrac: { num: 1, den: 2 }, // 1/2 of pink flowers are roses
+                redCarnationsFrac: { num: 2, den: 3 }, // 2/3 of red flowers are carnations
+                pinkFlowersFrac: { num: 4, den: 10 } // 4/10 of total flowers are pink
+            },
+            {
+                pinkRosesFrac: { num: 1, den: 3 }, // 1/3 of pink flowers are roses
+                redCarnationsFrac: { num: 3, den: 4 }, // 3/4 of red flowers are carnations
+                pinkFlowersFrac: { num: 6, den: 10 } // 6/10 of total flowers are pink (Original problem)
+            },
+            {
+                pinkRosesFrac: { num: 1, den: 4 }, // 1/4 of pink flowers are roses
+                redCarnationsFrac: { num: 1, den: 2 }, // 1/2 of red flowers are carnations
+                pinkFlowersFrac: { num: 3, den: 5 } // 3/5 of total flowers are pink
+            },
+            {
+                pinkRosesFrac: { num: 2, den: 5 }, // 2/5 of pink flowers are roses
+                redCarnationsFrac: { num: 3, den: 5 }, // 3/5 of red flowers are carnations
+                pinkFlowersFrac: { num: 1, den: 2 } // 1/2 of total flowers are pink
+            }
+        ];
+
+        const optionLabels = ['A', 'B', 'C', 'D', 'E']; // Labels for multiple choice options
+
+        /**
+         * Generates a random integer within a specified range (inclusive).
+         * @param {number} min - The minimum value.
+         * @param {number} max - The maximum value.
+         * @returns {number} A random integer.
+         */
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        /**
+         * Shuffles an array in place (Fisher-Yates algorithm).
+         * @param {Array} array - The array to shuffle.
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        /**
+         * Calculates the percentage of carnations based on the given fractions.
+         * @param {object} fractions - Object containing numerator/denominator for each fraction.
+         * @returns {number} The calculated percentage of carnations.
+         */
+        function calculateCarnationPercentage(fractions) {
+            const pinkRosesRatio = fractions.pinkRosesFrac.num / fractions.pinkRosesFrac.den;
+            const redCarnationsRatio = fractions.redCarnationsFrac.num / fractions.redCarnationsFrac.den;
+            const pinkFlowersRatio = fractions.pinkFlowersFrac.num / fractions.pinkFlowersFrac.den;
+
+            // Pink Carnations (PC) = Pink Flowers - Pink Roses
+            // PC = P - (pinkRosesRatio * P) = P * (1 - pinkRosesRatio)
+            // PC = (pinkFlowersRatio * T) * (1 - pinkRosesRatio)
+            const pcRatio = pinkFlowersRatio * (1 - pinkRosesRatio);
+
+            // Red Flowers (R) = Total Flowers - Pink Flowers
+            // R = T - (pinkFlowersRatio * T) = T * (1 - pinkFlowersRatio)
+            const redFlowersRatio = (1 - pinkFlowersRatio);
+
+            // Red Carnations (RC) = redCarnationsRatio * Red Flowers
+            // RC = redCarnationsRatio * (redFlowersRatio * T)
+            const rcRatio = redCarnationsRatio * redFlowersRatio;
+
+            // Total Carnations (C) = PC + RC
+            const totalCarnationsRatio = pcRatio + rcRatio;
+
+            return Math.round(totalCarnationsRatio * 100); // Round to nearest integer percentage
+        }
+
+        /**
+         * Generates a new math question and updates the UI with multiple-choice options.
+         */
+        function generateNewQuestion() {
+            // Clear previous message and options
+            messageElement.textContent = '';
+            messageElement.className = 'message';
+            optionsContainer.innerHTML = ''; // Clear old buttons
+
+            // Select a random question template
+            const template = questionTemplates[getRandomInt(0, questionTemplates.length - 1)];
+
+            // Calculate the correct answer
+            correctAnswer = calculateCarnationPercentage(template);
+
+            // Construct the question string using template values
+            const questionText = `A flower bouquet contains pink roses, red roses, pink carnations, and red carnations. ${fractionToText(template.pinkRosesFrac.num, template.pinkRosesFrac.den)} of the pink flowers are roses, ${fractionToText(template.redCarnationsFrac.num, template.redCarnationsFrac.den)} of the red flowers are carnations, and ${fractionToText(template.pinkFlowersFrac.num, template.pinkFlowersFrac.den)} of the flowers are pink. What percent of the flowers are carnations?`;
+            questionElement.textContent = questionText;
+
+            // Generate multiple-choice options
+            const options = new Set();
+            options.add(correctAnswer); // Add the correct answer first
+
+            // Generate 4 incorrect answers
+            while (options.size < 5) {
+                let incorrectOption;
+                // Generate offsets that are typically 5, 10, or 15 percentage points away
+                const offsetChoices = [5, 10, 15];
+                const offset = offsetChoices[getRandomInt(0, offsetChoices.length - 1)];
+
+                if (Math.random() < 0.5) { // Randomly make it less or more than correct answer
+                    incorrectOption = correctAnswer - offset;
+                } else {
+                    incorrectOption = correctAnswer + offset;
+                }
+
+                // Ensure options are distinct, positive, and within a reasonable percentage range (0-100)
+                if (!options.has(incorrectOption) && incorrectOption >= 0 && incorrectOption <= 100) {
+                    options.add(incorrectOption);
+                }
+            }
+
+            const shuffledOptions = Array.from(options);
+            shuffleArray(shuffledOptions);
+
+            // Create and append option buttons with A, B, C, D, E labels
+            shuffledOptions.forEach((optionValue, index) => {
+                const button = document.createElement('button');
+                button.classList.add('option-button');
+                button.innerHTML = `<span class="option-label">(${optionLabels[index]})</span> ${optionValue}%`; // Add % sign
+                button.dataset.value = optionValue; // Store the value in a data attribute
+
+                button.addEventListener('click', () => checkAnswer(parseFloat(button.dataset.value)));
+                optionsContainer.appendChild(button);
+            });
+
+            // Re-enable all option buttons for the new question
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.disabled = false;
+            });
+        }
+
+        /**
+         * Checks the user's selected answer against the correct answer.
+         * @param {number} userAnswer - The value of the option selected by the user.
+         */
+        function checkAnswer(userAnswer) {
+            // Remove 'selected' class from all buttons
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            // Add 'selected' class to the clicked button
+            const clickedButton = optionsContainer.querySelector(`[data-value="${userAnswer}"]`);
+            if (clickedButton) {
+                clickedButton.classList.add('selected');
+            }
+
+            // Compare the rounded user answer with the rounded correct answer
+            if (userAnswer === correctAnswer) {
+                messageElement.textContent = "Correct! Well done!";
+                messageElement.className = 'message correct';
+            } else {
+                messageElement.textContent = `Incorrect. The correct answer was ${correctAnswer}%.`;
+                messageElement.className = 'message incorrect';
+            }
+
+            // Disable all option buttons after an answer is selected
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+
+        // Event Listener
+        newQuestionBtn.addEventListener('click', generateNewQuestion);
+
+        // Generate the first question when the page loads
+        window.onload = generateNewQuestion;
+    </script>
+</body>
+</html>

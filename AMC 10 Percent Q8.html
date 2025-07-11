@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMC 10 Percent Question 8</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        .question-text {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            text-align: left; /* Align question text to left for better readability */
+        }
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            text-align: left; /* Align options to left */
+        }
+        .option-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        .option-item:hover {
+            background-color: #f7fafc;
+        }
+        .option-item input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2); /* Slightly larger radio buttons */
+            accent-color: #6366f1; /* Custom color for radio button */
+        }
+        .option-item label {
+            font-size: 1rem;
+            color: #2d3748;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+        }
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        .btn-primary {
+            background-color: #6366f1;
+            color: #ffffff;
+            background-image: linear-gradient(to right, #6366f1, #8b5cf6);
+        }
+        .btn-primary:hover {
+            background-color: #5a5ceb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .result-box {
+            background-color: #edf2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-size: 1.1rem;
+            color: #2d3748;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+        }
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AMC 10 Percent Question 8</h1>
+        <p class="question-text">
+            Last <span id="season"></span>, <span id="pct1"></span>% of the <span id="animals"></span> at the <span id="location"></span> were <span id="type1"></span>, <span id="pct2"></span>% were <span id="type2"></span>, <span id="pct3"></span>% were <span id="type3"></span>, and <span id="pct4"></span>% were <span id="type4"></span>. What percentage of the <span id="animalsAgain"></span> that were not <span id="excludeType"></span> were <span id="targetType"></span>?
+        </p>
+
+        <div class="options-group" id="optionsGroup">
+            <!-- Options will be dynamically generated here -->
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="checkAnswer()">Check Answer</button>
+            <button class="btn btn-primary" onclick="generateNewQuestion()">Generate New Question</button>
+        </div>
+
+        <div id="result" class="result-box">
+            Select an option and click "Check Answer".
+        </div>
+    </div>
+
+    <script>
+        // Global variables to store current question parameters
+        let currentPct1, currentPct2, currentPct3, currentPct4, currentExcludeTypeIndex, currentTargetTypeIndex;
+
+        /**
+         * Generates a random integer within a specified range.
+         * @param {number} min - The minimum value (inclusive).
+         * @param {number} max - The maximum value (inclusive).
+         * @returns {number} A random integer.
+         */
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        /**
+         * Calculates the correct percentage for the conditional probability question.
+         * @param {number} pct1 - Percentage of type 1.
+         * @param {number} pct2 - Percentage of type 2.
+         * @param {number} pct3 - Percentage of type 3.
+         * @param {number} pct4 - Percentage of type 4.
+         * @param {number} excludeTypeIndex - Index of the type to exclude (0-3).
+         * @param {number} targetTypeIndex - Index of the type to target (0-3).
+         * @returns {number} The calculated percentage, rounded to the nearest whole number.
+         */
+        function getCorrectPercentage(pct1, pct2, pct3, pct4, excludeTypeIndex, targetTypeIndex) {
+            const percentages = [pct1, pct2, pct3, pct4];
+
+            const totalPercentage = percentages.reduce((sum, current) => sum + current, 0);
+            if (totalPercentage !== 100) {
+                // This should not happen with current generation logic, but good for robustness
+                console.error("Percentages do not sum to 100!");
+                return 0;
+            }
+
+            const excludePercentage = percentages[excludeTypeIndex];
+            const targetPercentage = percentages[targetTypeIndex];
+
+            // If the target type is the same as the excluded type, the answer is 0.
+            if (excludeTypeIndex === targetTypeIndex) {
+                return 0;
+            }
+
+            const percentageNotExcluded = 100 - excludePercentage;
+
+            if (percentageNotExcluded === 0) {
+                return 0; // Avoid division by zero
+            }
+
+            const result = (targetPercentage / percentageNotExcluded) * 100;
+            return Math.round(result); // Round to the nearest whole percent
+        }
+
+        /**
+         * Generates a new math question with random values and updates the UI.
+         */
+        function generateNewQuestion() {
+            const seasons = ['spring', 'summer', 'fall', 'winter'];
+            const animals = ['birds', 'animals', 'fish', 'insects'];
+            const locations = ['Town Lake', 'city zoo', 'forest park', 'river delta'];
+            const animalTypes = [
+                ['monkeys', 'lions', 'tigers', 'bears'],
+                ['geese', 'swans', 'herons', 'ducks'],
+                ['dogs', 'cats', 'hamsters', 'parrots'],
+                ['sharks', 'dolphins', 'whales', 'seals'] // New set for 'animal' context
+            ];
+
+            const selectedSeason = seasons[getRandomInt(0, seasons.length - 1)];
+            const selectedAnimals = animals[getRandomInt(0, animals.length - 1)];
+            const selectedLocation = locations[getRandomInt(0, locations.length - 1)];
+
+            // Select animal types based on the 'animals' category
+            let selectedAnimalTypesSet;
+            if (selectedAnimals === 'fish') {
+                selectedAnimalTypesSet = ['trout', 'salmon', 'bass', 'carp']; // Specific fish types
+            } else if (selectedAnimals === 'animals') {
+                selectedAnimalTypesSet = animalTypes[getRandomInt(0, animalTypes.length - 1)]; // Use existing sets
+            } else {
+                // For 'birds' or 'insects', you might want to define specific sets
+                // For now, let's default to a general animalTypes set
+                selectedAnimalTypesSet = animalTypes[getRandomInt(0, animalTypes.length - 1)];
+            }
+
+
+            // Generate percentages that sum to 100
+            let p1, p2, p3, p4;
+            let attempts = 0;
+            const maxAttempts = 500;
+            do {
+                p1 = getRandomInt(10, 40);
+                p2 = getRandomInt(10, 40);
+                p3 = getRandomInt(10, 40);
+                p4 = 100 - (p1 + p2 + p3);
+                attempts++;
+            } while ((p4 < 10 || p4 > 40) && attempts < maxAttempts); // Ensure p4 is also within a reasonable range
+
+            if (attempts === maxAttempts) { // Fallback if no good combination found
+                p1 = 30; p2 = 25; p3 = 10; p4 = 35; // Original question values or similar
+            }
+
+            currentPct1 = p1;
+            currentPct2 = p2;
+            currentPct3 = p3;
+            currentPct4 = p4;
+
+            // Randomly select which type to exclude and which to target
+            // Ensure target and exclude types are different
+            currentExcludeTypeIndex = getRandomInt(0, 3);
+            do {
+                currentTargetTypeIndex = getRandomInt(0, 3);
+            } while (currentTargetTypeIndex === currentExcludeTypeIndex);
+
+
+            // Update the question text with new values
+            document.getElementById('season').innerText = selectedSeason;
+            document.getElementById('pct1').innerText = currentPct1;
+            document.getElementById('animals').innerText = selectedAnimals;
+            document.getElementById('location').innerText = selectedLocation;
+            document.getElementById('type1').innerText = selectedAnimalTypesSet[0];
+            document.getElementById('pct2').innerText = currentPct2;
+            document.getElementById('type2').innerText = selectedAnimalTypesSet[1];
+            document.getElementById('pct3').innerText = currentPct3;
+            document.getElementById('type3').innerText = selectedAnimalTypesSet[2];
+            document.getElementById('pct4').innerText = currentPct4;
+            document.getElementById('type4').innerText = selectedAnimalTypesSet[3];
+            document.getElementById('animalsAgain').innerText = selectedAnimals;
+            document.getElementById('excludeType').innerText = selectedAnimalTypesSet[currentExcludeTypeIndex];
+            document.getElementById('targetType').innerText = selectedAnimalTypesSet[currentTargetTypeIndex];
+
+
+            // Calculate the correct answer for the new question
+            const correctAnswer = getCorrectPercentage(
+                currentPct1, currentPct2, currentPct3, currentPct4,
+                currentExcludeTypeIndex, currentTargetTypeIndex
+            );
+
+            // Generate multiple-choice options
+            const options = [];
+            options.push(correctAnswer); // Add the correct answer
+
+            // Generate three distractors
+            while (options.length < 4) {
+                let distractor;
+                const offset = getRandomInt(-10, 10); // Offset by -10 to +10 percentage points
+                distractor = Math.round(correctAnswer + offset);
+
+                // Ensure distractor is within 0-100 range and is unique
+                if (distractor >= 0 && distractor <= 100 && !options.includes(distractor)) {
+                    options.push(distractor);
+                }
+            }
+
+            // Shuffle the options
+            options.sort(() => Math.random() - 0.5);
+
+            // Display options
+            const optionsGroup = document.getElementById('optionsGroup');
+            optionsGroup.innerHTML = ''; // Clear previous options
+
+            const optionLetters = ['A', 'B', 'C', 'D'];
+            options.forEach((option, index) => {
+                const optionItem = document.createElement('div');
+                optionItem.className = 'option-item';
+                optionItem.innerHTML = `
+                    <input type="radio" id="option${optionLetters[index]}" name="answerOption" value="${option}">
+                    <label for="option${optionLetters[index]}">${optionLetters[index]}) ${option}%</label>
+                `;
+                optionsGroup.appendChild(optionItem);
+            });
+
+            // Clear the result message
+            document.getElementById('result').innerText = "Select an option and click 'Check Answer'.";
+            document.getElementById('result').style.color = '#2d3748'; // Reset color
+        }
+
+        /**
+         * Checks the user's selected answer against the correct answer for the current question.
+         */
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="answerOption"]:checked');
+            const resultDiv = document.getElementById('result');
+
+            if (!selectedOption) {
+                resultDiv.innerText = "Please select an option.";
+                resultDiv.style.color = '#e53e3e'; // Red for error
+                return;
+            }
+
+            const userAnswer = parseInt(selectedOption.value); // Parse as integer
+            // Recalculate correct answer based on current parameters to ensure consistency
+            const correctAnswer = getCorrectPercentage(
+                currentPct1, currentPct2, currentPct3, currentPct4,
+                currentExcludeTypeIndex, currentTargetTypeIndex
+            );
+
+            // Compare the user's integer answer with the correct integer answer
+            if (userAnswer === correctAnswer) {
+                resultDiv.innerText = `Correct! The percentage is ${correctAnswer}%.`;
+                resultDiv.style.color = '#38a169'; // Green for correct
+            } else {
+                resultDiv.innerText = `Incorrect. The correct answer is ${correctAnswer}%.`; // Show correct answer on incorrect
+                resultDiv.style.color = '#e53e3e'; // Red for incorrect
+            }
+        }
+
+        // Generate a new question when the page loads
+        window.onload = generateNewQuestion;
+    </script>
+</body>
+</html>
